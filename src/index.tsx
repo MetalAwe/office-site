@@ -2,6 +2,7 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { stringPages } from "./string-pages";
+import { etaPages } from "./eta-pages";
 
 const app = new Hono();
 app.use(logger());
@@ -31,6 +32,9 @@ app.get("/home", (c) => c.redirect("/"));
 
 // step 4: pages from strings
 app.route("/strings", stringPages);
+
+// step 5: pages from an engine
+app.route("/eta", etaPages);
 
 app.notFound((c) => c.json({ error: "Not found", path: c.req.path }, 404));
 
