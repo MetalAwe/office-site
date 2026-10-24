@@ -5,9 +5,12 @@ import { stringPages } from "./string-pages";
 import { etaPages } from "./eta-pages";
 import { team } from "./data";
 import { Layout } from "./views/Layout";
+import { serveStatic } from "@hono/bun";
+import { readdir } from "node:fs/promises";
 
 const app = new Hono();
 app.use(logger());
+app.use("*", serveStatic({ root: "./public" }));
 
 app.get("/echo", (c) => c.json({ hello: c.req.query("name") ?? "stranger" }));
 app.post("/echo", async (c) => {
@@ -57,6 +60,24 @@ app.get("/team", (c) =>
     </Layout>,
   ),
 );
+
+// step 7b: a page that lists a folder
+app.get("/files", async (c) => {
+  const names = await readdir("./public");
+  const files = names.map((name) => ({ name, size: Bun.file(`./public/${name}`).size }));
+  return c.html(
+    <Layout title="Files">
+      <h1>public/</h1>
+      <ul>
+        {files.map((file) => (
+          <li>
+            <a href={`/${file.name}`}>{file.name}</a> — {file.size} bytes
+          </li>
+        ))}
+      </ul>
+    </Layout>,
+  );
+});
 
 app.notFound((c) => c.json({ error: "Not found", path: c.req.path }, 404));
 
