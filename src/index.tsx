@@ -93,6 +93,16 @@ app.get("/files", async (c) => {
   );
 });
 
+// step 9: the about page (branch feat/about-page)
+app.get("/about", (c) =>
+  c.html(
+    <Layout title="About">
+      <h1>About</h1>
+      <p>The office site plans building surveys, assigns them and reads what the field app sends back.</p>
+    </Layout>,
+  ),
+);
+
 // step 8: our own 404 and 500 pages
 app.notFound((c) =>
   c.html(
