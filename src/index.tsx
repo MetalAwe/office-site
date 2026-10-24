@@ -1,15 +1,27 @@
 // src/index.tsx — the office site
+import { serveStatic } from "@hono/bun";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { stringPages } from "./string-pages";
-import { etaPages } from "./eta-pages";
-import { team } from "./data";
-import { Layout } from "./views/Layout";
-import { serveStatic } from "@hono/bun";
 import { readdir } from "node:fs/promises";
+import { team } from "./data";
+import { etaPages } from "./eta-pages";
+import { stringPages } from "./string-pages";
+import { Layout } from "./views/Layout";
 
-const app = new Hono();
+type Env = { Variables: { requestId: string } };
+const app = new Hono<Env>();
+
 app.use(logger());
+
+// step 8: a middleware of our own
+app.use(async (c, next) => {
+  const started = performance.now();
+  c.set("requestId", crypto.randomUUID().slice(0, 8));
+  await next();
+  const ms = (performance.now() - started).toFixed(1);
+  c.header("X-Request-Id", c.get("requestId"));
+  c.header("X-Response-Time", `${ms}ms`);
+});
 app.use("*", serveStatic({ root: "./public" }));
 
 app.get("/echo", (c) => c.json({ hello: c.req.query("name") ?? "stranger" }));
@@ -23,7 +35,9 @@ app.get("/time", (c) => {
 });
 
 // step 3: responses by hand
-app.get("/api/status", (c) => c.json({ ok: true, uptime: Math.round(process.uptime()) }));
+app.get("/api/status", (c) =>
+  c.json({ ok: true, uptime: Math.round(process.uptime()), requestId: c.get("requestId") }),
+);
 app.get("/hello", (c) => c.html(`<h1>Hello, ${c.req.query("name") ?? "stranger"}!</h1>`));
 app.get("/teapot", (c) => {
   c.header("X-Brewed-By", "Hono");
@@ -79,6 +93,32 @@ app.get("/files", async (c) => {
   );
 });
 
-app.notFound((c) => c.json({ error: "Not found", path: c.req.path }, 404));
+// step 8: our own 404 and 500 pages
+app.notFound((c) =>
+  c.html(
+    <Layout title="Not found">
+      <h1>404 — nothing here</h1>
+      <p>
+        No page at <code>{c.req.path}</code>. <a href="/">Back home</a>
+      </p>
+    </Layout>,
+    404,
+  ),
+);
+
+app.onError((err, c) => {
+  console.error(`[${c.get("requestId")}]`, err.message);
+  return c.html(
+    <Layout title="Error">
+      <h1>Something broke</h1>
+      <p>Request {c.get("requestId")} failed. It has been logged.</p>
+    </Layout>,
+    500,
+  );
+});
+
+app.get("/boom", () => {
+  throw new Error("Boom: a test error");
+});
 
 export default app;
