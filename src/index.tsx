@@ -1,6 +1,7 @@
 // src/index.tsx — the office site
 import { Hono } from "hono";
 import { logger } from "hono/logger";
+import { stringPages } from "./string-pages";
 
 const app = new Hono();
 app.use(logger());
@@ -27,6 +28,9 @@ app.get("/teapot", (c) => {
   return c.text("I'm a teapot\n", 418);
 });
 app.get("/home", (c) => c.redirect("/"));
+
+// step 4: pages from strings
+app.route("/strings", stringPages);
 
 app.notFound((c) => c.json({ error: "Not found", path: c.req.path }, 404));
 
