@@ -7,6 +7,7 @@ import { team } from "./data";
 import { etaPages } from "./eta-pages";
 import { stringPages } from "./string-pages";
 import { Layout } from "./views/Layout";
+import { buildings } from "./data";
 
 type Env = { Variables: { requestId: string } };
 const app = new Hono<Env>();
@@ -99,23 +100,33 @@ app.get("/buildings", (c) =>
     <Layout title="Buildings">
       <h1>Buildings</h1>
       <p>List of buildings to survey.</p>
-      <p><a href="/buildings/1">Building 1</a> · <a href="/buildings/2">Building 2</a> · <a href="/buildings/3">Building 3</a></p>
+      <ul>
+        {buildings.map((b) => (
+          <li key={b.id}>
+            <a href={`/buildings/${b.id}`}>{b.name}</a>
+          </li>
+        ))}
+      </ul>
     </Layout>,
   )
 );
 app.get("/buildings/:id", (c) => {
   const id = c.req.param("id");
-  const validBuildings = ["1", "2", "3"];
-  if(!validBuildings.includes(id)) return c.notFound();
+  const building = buildings.find((b) => id === b.id.toString());
+
+  if (!building) {
+    return c.notFound();
+  }
+
   return c.html(
-    <Layout title="Building">
-      <h1>Building {id}</h1>
-      <p>Details of building {id}.</p>
-      if (id.notFound(id)) {
-        <p><a href="/buildings/1/floorplans">Floor plans</a></p>
-      }
+    <Layout title={building.name}>
+      <h1>{building.name}</h1>
+      <p>{building.description}</p>
+      <p>
+        <a href={`/buildings/${building.id}/floorplans`}>Floor plans</a>
+      </p>
     </Layout>,
-  )
+  );
 });
 
 // step 9: the about page (branch feat/about-page)
