@@ -5,5 +5,9 @@
   "scripts": {
     "dev:server": "bun run --filter server dev",
     "dev:web": "bun run --filter web dev"
+  },
+  "dependencies": {
+    "@hono/bun": "^1.0.1",
+    "hono": "^4.13.14"
   }
 }

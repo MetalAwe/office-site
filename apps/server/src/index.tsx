@@ -27,7 +27,6 @@ app.use(async (c, next) => {
   c.header("X-Response-Time", `${ms}ms`);
 });
 
-// CORS by hand — let the page on localhost:5173 read /api answers
 app.use("/api/*", cors({ origin: "http://localhost:5173" }));
 
 

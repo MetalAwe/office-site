@@ -3,12 +3,7 @@ import { useEffect, useState } from "react";
 
 const API = "http://localhost:3000";
 
-type Entrance = {
-  id: number;
-  address: string;
-  floors: number;
-  hasElevator: boolean;
-};
+import type { Entrance } from "@office/shared";
 
 function EntranceItem({ entrance }: { entrance: Entrance }) {
   return (
