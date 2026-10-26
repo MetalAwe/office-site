@@ -18,10 +18,10 @@ export function Layout({ title, children }: LayoutProps) {
         <body>
           <nav>
             <img src="/logo.svg" alt="" width="24" height="24" />
-            <a href="/">Home</a> · <a href="/team">Team</a> · <a href="/about">About</a>
+            <a href="/">Home</a> · <a href="/team">Team</a> · <a href="/about">About</a> · <a href="/buildings">Buildings</a>
           </nav>
           <main>{children}</main>
-          <footer>Office site · week 2</footer>
+          <footer>Office site · week 2 with go further</footer>
         </body>
       </html>
     </>
