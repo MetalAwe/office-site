@@ -93,6 +93,31 @@ app.get("/files", async (c) => {
   );
 });
 
+// go further - week 2
+app.get("/buildings", (c) =>
+  c.html(
+    <Layout title="Buildings">
+      <h1>Buildings</h1>
+      <p>List of buildings to survey.</p>
+      <p><a href="/buildings/1">Building 1</a> · <a href="/buildings/2">Building 2</a> · <a href="/buildings/3">Building 3</a></p>
+    </Layout>,
+  )
+);
+app.get("/buildings/:id", (c) => {
+  const id = c.req.param("id");
+  const validBuildings = ["1", "2", "3"];
+  if(!validBuildings.includes(id)) return c.notFound();
+  return c.html(
+    <Layout title="Building">
+      <h1>Building {id}</h1>
+      <p>Details of building {id}.</p>
+      if (id.notFound(id)) {
+        <p><a href="/buildings/1/floorplans">Floor plans</a></p>
+      }
+    </Layout>,
+  )
+});
+
 // step 9: the about page (branch feat/about-page)
 app.get("/about", (c) =>
   c.html(
