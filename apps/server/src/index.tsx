@@ -1,4 +1,5 @@
 // src/index.tsx — the office site
+import { entrancesApi } from "./entrances";
 import { serveStatic } from "@hono/bun";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -14,6 +15,7 @@ const app = new Hono<Env>();
 
 app.use(logger());
 
+app.route("/api/entrances", entrancesApi);
 // step 8: a middleware of our own
 app.use(async (c, next) => {
   const started = performance.now();
