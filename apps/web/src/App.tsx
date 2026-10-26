@@ -1,18 +1,10 @@
 // apps/web/src/App.tsx — the list comes from the server
 import { useEffect, useState } from "react";
+import { EntranceForm } from "./EntranceForm";
 
 const API = "http://localhost:3000";
 
 import type { Entrance } from "@office/shared";
-
-function EntranceItem({ entrance }: { entrance: Entrance }) {
-  return (
-    <li>
-      {entrance.address} — {entrance.floors} floors
-      {entrance.hasElevator ? ", elevator" : ""}
-    </li>
-  );
-}
 
 export default function App() {
   const [entrances, setEntrances] = useState<Entrance[]>([]);
@@ -40,12 +32,10 @@ export default function App() {
   return (
     <main>
       <h1>Entrances</h1>
-      {error && <p role="alert">Could not load the entrances: {error}</p>}
-      <ul>
-        {entrances.map((entrance) => (
-          <EntranceItem entrance={entrance} key={entrance.id} />
-        ))}
-      </ul>
+      <EntranceForm
+      api={API}
+      onCreated={(entrance) => setEntrances([...entrances, entrance])}
+      />
     </main>
   );
 }
