@@ -95,36 +95,69 @@ app.get("/files", async (c) => {
 });
 
 // go further - week 2
-app.get("/buildings", (c) =>
-  c.html(
+
+//first, the building we query the user for the number of floors,
+//then we filter the list of buildings to only those with that many floors or more
+app.get("/buildings", (c) => {
+  const floorsParam = c.req.query("floors");
+  let minFloors: number | undefined;
+
+  if (floorsParam !== undefined) {
+    // Validate integer-only format (prevents Number("") -> 0, "5abc", etc.)
+    if (!/^\d+$/.test(floorsParam)) {
+      return c.text("Invalid 'floors' parameter: must be a non-negative integer\n", 400);
+    }
+    minFloors = Number.parseInt(floorsParam, 10);
+  }
+
+  // filter buildings based on the minFloors parameter
+  const filteredBuildings = minFloors !== undefined
+    ? buildings.filter((b) => b.floors >= minFloors)
+    : buildings;
+
+  // print the filtered list of buildings, or a message if none match
+  return c.html(
     <Layout title="Buildings">
       <h1>Buildings</h1>
       <p>List of buildings to survey.</p>
+      {floorsParam !== undefined && (
+        <p>
+          Filtering by minimum floors: <strong>{minFloors}</strong> (
+          <a href="/buildings">Clear filter</a>)
+        </p>
+      )}
       <ul>
-        {buildings.map((b) => (
-          <li key={b.id}>
-            <a href={`/buildings/${b.id}`}>{b.name}</a>
-          </li>
-        ))}
+        {filteredBuildings.length > 0 ? (
+          filteredBuildings.map((b) => (
+            <li key={b.id}>
+              <a href={`/buildings/${b.id}`}>{b.name}</a> — {b.floors} floors ({b.address})
+            </li>
+          ))
+        ) : (
+          <li>No buildings match the criteria.</li>
+        )}
       </ul>
     </Layout>,
   )
+} 
 );
-app.get("/buildings/:id", (c) => {
-  const id = c.req.param("id");
-  const building = buildings.find((b) => id === b.id.toString());
 
+// the detailed view of a building, based on its id
+app.get("/buildings/:id", (c) => {
+  // validate that the id parameter is a positive integer
+  const id = c.req.param("id");
+  const building = buildings.find((b) => b.id.toString() === id);
+  //returns 404 if the building is not found
   if (!building) {
     return c.notFound();
   }
-
+  // returns the building details if found
   return c.html(
-    <Layout title={building.name}>
+    <Layout title={building.address}>
       <h1>{building.name}</h1>
+      <p><strong>Address:</strong> {building.address}</p>
+      <p><strong>Floors:</strong> {building.floors}</p>
       <p>{building.description}</p>
-      <p>
-        <a href={`/buildings/${building.id}/floorplans`}>Floor plans</a>
-      </p>
     </Layout>,
   );
 });
@@ -167,4 +200,7 @@ app.get("/boom", () => {
   throw new Error("Boom: a test error");
 });
 
-export default app;
+export default{
+  port: 3000,
+  fetch: app.fetch,
+};
