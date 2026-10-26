@@ -9,13 +9,14 @@ import { etaPages } from "./eta-pages";
 import { stringPages } from "./string-pages";
 import { Layout } from "./views/Layout";
 import { buildings } from "./data";
+import { cors } from "hono/cors";
 
 type Env = { Variables: { requestId: string } };
 const app = new Hono<Env>();
 
 app.use(logger());
 
-app.route("/api/entrances", entrancesApi);
+
 // step 8: a middleware of our own
 app.use(async (c, next) => {
   const started = performance.now();
@@ -25,7 +26,11 @@ app.use(async (c, next) => {
   c.header("X-Request-Id", c.get("requestId"));
   c.header("X-Response-Time", `${ms}ms`);
 });
-app.use("*", serveStatic({ root: "./public" }));
+
+// CORS by hand — let the page on localhost:5173 read /api answers
+app.use("/api/*", cors({ origin: "http://localhost:5173" }));
+
+
 
 app.get("/echo", (c) => c.json({ hello: c.req.query("name") ?? "stranger" }));
 app.post("/echo", async (c) => {
@@ -53,6 +58,8 @@ app.route("/strings", stringPages);
 
 // step 5: pages from an engine
 app.route("/eta", etaPages);
+
+app.route("/api/entrances", entrancesApi);
 
 // step 6: pages from components
 app.get("/", (c) => {
