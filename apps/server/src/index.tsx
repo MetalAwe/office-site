@@ -5,6 +5,7 @@ import { serveStatic } from "@hono/bun";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { buildingsApi } from "./buildings";
 import { team } from "./data";
 import { entrancesApi } from "./entrances";
 import { etaPages } from "./eta-pages";
@@ -79,6 +80,7 @@ app.get("/teapot", (c) => {
 });
 app.get("/home", (c) => c.redirect("/"));
 
+app.route("/api/buildings", buildingsApi);
 app.route("/api/entrances", entrancesApi);
 
 // step 4: pages from strings
