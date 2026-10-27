@@ -1,23 +1,16 @@
-# lab1
+# office
 
-To install dependencies:
+The office side of the building survey: a Bun workspace.
 
-```bash
-bun install
-```
+- `apps/server` — Hono: the pages from lab 2 and `/api/entrances`
+- `apps/web` — React + Vite: the entrance list and its form
+- `packages/shared` — `@office/shared`: the zod schema and the types both sides use
 
-To run:
-
-```bash
-bun run index.ts
-```
-
-To type check:
+## Run it
 
 ```bash
-bun check
+bun install          # once, from the root: every workspace, one bun.lock
+bun run dev:server   # http://localhost:3000
+bun run dev:web      # http://localhost:5173 (a second terminal)
+bun run check        # Ultracite (Biome): format + lint
 ```
-
-Run `bun fmt` to format the code.
-
-This project was created using `bun init` in bun v1.4.4. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
