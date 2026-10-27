@@ -1,6 +1,7 @@
 // apps/web/src/EntranceForm.tsx — a controlled form, validated by hand
-import { type FormEvent, useState } from "react";
+
 import { type Entrance, fieldErrors, NewEntrance } from "@office/shared";
+import { type FormEvent, useState } from "react";
 
 type Errors = Partial<Record<string, string[]>>;
 
@@ -15,19 +16,23 @@ export function EntranceForm({
   const [floors, setFloors] = useState("");
   const [hasElevator, setHasElevator] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
-     // the server's schema, run before anything leaves the browser
-    const result = NewEntrance.safeParse({ address, floors: Number(floors), hasElevator });
-    if (!result.success) {
-      setErrors(fieldErrors(result.error));
-      return;
-    }
-    setErrors({});
-    // …fetch as before, with body: JSON.stringify(result.data)
+  // the server's schema, run before anything leaves the browser
+  const result = NewEntrance.safeParse({
+    address,
+    floors: Number(floors),
+    hasElevator,
+  });
+  if (!result.success) {
+    setErrors(fieldErrors(result.error));
+    return;
+  }
+  setErrors({});
+  // …fetch as before, with body: JSON.stringify(result.data)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); // no page reload: React handles the submit
     // the same checks as the server's, written a second time
-    
+
     const found: Errors = {};
     if (address.trim() === "") {
       found.address = ["Address is required"];
@@ -41,9 +46,9 @@ export function EntranceForm({
       return;
     }
     const res = await fetch(`${api}/api/entrances`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address, floors: Number(floors), hasElevator }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
     });
     const data = await res.json();
     if (!res.ok) {
@@ -71,7 +76,7 @@ export function EntranceForm({
           value={floors}
         />
       </label>
-          {errors.floors && <p className="error">{errors.floors[0]}</p>}
+      {errors.floors && <p className="error">{errors.floors[0]}</p>}
       <label>
         <input
           checked={hasElevator}

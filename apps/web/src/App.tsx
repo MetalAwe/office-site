@@ -1,14 +1,14 @@
 // apps/web/src/App.tsx — the list comes from the server
+
+import type { Entrance } from "@office/shared";
 import { useEffect, useState } from "react";
 import { EntranceForm } from "./EntranceForm";
-import type { Entrance } from "@office/shared";
 
 const API = "http://localhost:3000";
 
-
 export default function App() {
   const [entrances, setEntrances] = useState<Entrance[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -33,8 +33,8 @@ export default function App() {
     <main>
       <h1>Entrances</h1>
       <EntranceForm
-      api={API}
-      onCreated={(entrance) => setEntrances([...entrances, entrance])}
+        api={API}
+        onCreated={(entrance) => setEntrances([...entrances, entrance])}
       />
     </main>
   );

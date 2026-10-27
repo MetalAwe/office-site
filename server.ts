@@ -19,22 +19,22 @@ const server = Bun.serve({
     if (req.method === "POST" && url.pathname === "/echo") {
       const body = await req.text();
       return Response.json({
-        youSent: body,
         contentType: req.headers.get("content-type"),
         length: body.length,
+        youSent: body,
       });
     }
 
     if (req.method === "GET" && url.pathname === "/time") {
       return Response.json(
         { now: new Date().toISOString() },
-        { headers: { "Cache-Control": "no-store" } },
+        { headers: { "Cache-Control": "no-store" } }
       );
     }
 
     return Response.json(
       { error: "Not found", path: url.pathname },
-      { status: 404 },
+      { status: 404 }
     );
   },
 });

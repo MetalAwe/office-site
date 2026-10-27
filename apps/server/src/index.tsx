@@ -1,21 +1,21 @@
 // src/index.tsx — the office site
-import { entrancesApi } from "./entrances";
-import { serveStatic } from "@hono/bun";
-import { Hono } from "hono";
-import { logger } from "hono/logger";
+
 import { readdir } from "node:fs/promises";
-import { team } from "./data";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { logger } from "hono/logger";
+import { buildings, team } from "./data";
+import { entrancesApi } from "./entrances";
 import { etaPages } from "./eta-pages";
 import { stringPages } from "./string-pages";
 import { Layout } from "./views/Layout";
-import { buildings } from "./data";
-import { cors } from "hono/cors";
 
-type Env = { Variables: { requestId: string } };
+interface Env {
+  Variables: { requestId: string };
+}
 const app = new Hono<Env>();
 
 app.use(logger());
-
 
 // step 8: a middleware of our own
 app.use(async (c, next) => {
@@ -29,12 +29,10 @@ app.use(async (c, next) => {
 
 app.use("/api/*", cors({ origin: "http://localhost:5173" }));
 
-
-
 app.get("/echo", (c) => c.json({ hello: c.req.query("name") ?? "stranger" }));
 app.post("/echo", async (c) => {
   const body = await c.req.text();
-  return c.json({ youSent: body, contentType: c.req.header("content-type") });
+  return c.json({ contentType: c.req.header("content-type"), youSent: body });
 });
 app.get("/time", (c) => {
   c.header("Cache-Control", "no-store");
@@ -43,9 +41,15 @@ app.get("/time", (c) => {
 
 // step 3: responses by hand
 app.get("/api/status", (c) =>
-  c.json({ ok: true, uptime: Math.round(process.uptime()), requestId: c.get("requestId") }),
+  c.json({
+    ok: true,
+    requestId: c.get("requestId"),
+    uptime: Math.round(process.uptime()),
+  })
 );
-app.get("/hello", (c) => c.html(`<h1>Hello, ${c.req.query("name") ?? "stranger"}!</h1>`));
+app.get("/hello", (c) =>
+  c.html(`<h1>Hello, ${c.req.query("name") ?? "stranger"}!</h1>`)
+);
 app.get("/teapot", (c) => {
   c.header("X-Brewed-By", "Hono");
   return c.text("I'm a teapot\n", 418);
@@ -67,7 +71,7 @@ app.get("/", (c) => {
     <Layout title="Home">
       <h1>Hello, {name}!</h1>
       <p>The office side of the building survey.</p>
-    </Layout>,
+    </Layout>
   );
 });
 
@@ -80,14 +84,17 @@ app.get("/team", (c) =>
           <li>{member}</li>
         ))}
       </ul>
-    </Layout>,
-  ),
+    </Layout>
+  )
 );
 
 // step 7b: a page that lists a folder
 app.get("/files", async (c) => {
   const names = await readdir("./public");
-  const files = names.map((name) => ({ name, size: Bun.file(`./public/${name}`).size }));
+  const files = names.map((name) => ({
+    name,
+    size: Bun.file(`./public/${name}`).size,
+  }));
   return c.html(
     <Layout title="Files">
       <h1>public/</h1>
@@ -98,7 +105,7 @@ app.get("/files", async (c) => {
           </li>
         ))}
       </ul>
-    </Layout>,
+    </Layout>
   );
 });
 
@@ -112,16 +119,20 @@ app.get("/buildings", (c) => {
 
   if (floorsParam !== undefined) {
     // Validate integer-only format (prevents Number("") -> 0, "5abc", etc.)
-    if (!/^\d+$/.test(floorsParam)) {
-      return c.text("Invalid 'floors' parameter: must be a non-negative integer\n", 400);
+    if (!Number.isInteger(Number(floorsParam)) || Number(floorsParam) < 0) {
+      return c.text(
+        "Invalid 'floors' parameter: must be a non-negative integer\n",
+        400
+      );
     }
     minFloors = Number.parseInt(floorsParam, 10);
   }
 
   // filter buildings based on the minFloors parameter
-  const filteredBuildings = minFloors !== undefined
-    ? buildings.filter((b) => b.floors >= minFloors)
-    : buildings;
+  const filteredBuildings =
+    minFloors === undefined
+      ? buildings
+      : buildings.filter((b) => b.floors >= minFloors);
 
   // print the filtered list of buildings, or a message if none match
   return c.html(
@@ -138,17 +149,17 @@ app.get("/buildings", (c) => {
         {filteredBuildings.length > 0 ? (
           filteredBuildings.map((b) => (
             <li key={b.id}>
-              <a href={`/buildings/${b.id}`}>{b.name}</a> — {b.floors} floors ({b.address})
+              <a href={`/buildings/${b.id}`}>{b.name}</a> — {b.floors} floors (
+              {b.address})
             </li>
           ))
         ) : (
           <li>No buildings match the criteria.</li>
         )}
       </ul>
-    </Layout>,
-  )
-} 
-);
+    </Layout>
+  );
+});
 
 // the detailed view of a building, based on its id
 app.get("/buildings/:id", (c) => {
@@ -163,10 +174,14 @@ app.get("/buildings/:id", (c) => {
   return c.html(
     <Layout title={building.address}>
       <h1>{building.name}</h1>
-      <p><strong>Address:</strong> {building.address}</p>
-      <p><strong>Floors:</strong> {building.floors}</p>
+      <p>
+        <strong>Address:</strong> {building.address}
+      </p>
+      <p>
+        <strong>Floors:</strong> {building.floors}
+      </p>
       <p>{building.description}</p>
-    </Layout>,
+    </Layout>
   );
 });
 
@@ -175,9 +190,12 @@ app.get("/about", (c) =>
   c.html(
     <Layout title="About">
       <h1>About</h1>
-      <p>The office site plans building surveys, assigns them and reads what the field app sends back.</p>
-    </Layout>,
-  ),
+      <p>
+        The office site plans building surveys, assigns them and reads what the
+        field app sends back.
+      </p>
+    </Layout>
+  )
 );
 
 // step 8: our own 404 and 500 pages
@@ -189,8 +207,8 @@ app.notFound((c) =>
         No page at <code>{c.req.path}</code>. <a href="/">Back home</a>
       </p>
     </Layout>,
-    404,
-  ),
+    404
+  )
 );
 
 app.onError((err, c) => {
@@ -200,7 +218,7 @@ app.onError((err, c) => {
       <h1>Something broke</h1>
       <p>Request {c.get("requestId")} failed. It has been logged.</p>
     </Layout>,
-    500,
+    500
   );
 });
 
@@ -208,7 +226,7 @@ app.get("/boom", () => {
   throw new Error("Boom: a test error");
 });
 
-export default{
-  port: 3000,
+export default {
   fetch: app.fetch,
+  port: 3000,
 };
