@@ -1,10 +1,10 @@
 // apps/web/src/App.tsx — the list comes from the server
 import { useEffect, useState } from "react";
 import { EntranceForm } from "./EntranceForm";
+import type { Entrance } from "@office/shared";
 
 const API = "http://localhost:3000";
 
-import type { Entrance } from "@office/shared";
 
 export default function App() {
   const [entrances, setEntrances] = useState<Entrance[]>([]);

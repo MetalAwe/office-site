@@ -1,8 +1,8 @@
 // apps/web/src/EntranceForm.tsx — a controlled form, validated by hand
-import type { Entrance } from "@office/shared";
 import { type FormEvent, useState } from "react";
+import { type Entrance, fieldErrors, NewEntrance } from "@office/shared";
 
-type Errors = Record<string, string>;
+type Errors = Partial<Record<string, string[]>>;
 
 export function EntranceForm({
   api,
@@ -15,16 +15,26 @@ export function EntranceForm({
   const [floors, setFloors] = useState("");
   const [hasElevator, setHasElevator] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
+     // the server's schema, run before anything leaves the browser
+    const result = NewEntrance.safeParse({ address, floors: Number(floors), hasElevator });
+    if (!result.success) {
+      setErrors(fieldErrors(result.error));
+      return;
+    }
+    setErrors({});
+    // …fetch as before, with body: JSON.stringify(result.data)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); // no page reload: React handles the submit
     // the same checks as the server's, written a second time
+    
     const found: Errors = {};
     if (address.trim() === "") {
-      found.address = "Address is required";
+      found.address = ["Address is required"];
     }
+
     if (!Number.isInteger(Number(floors)) || Number(floors) < 0) {
-      found.floors = "Floors must be a whole number, 0 or more";
+      found.floors = ["Floors must be a whole number, 0 or more"];
     }
     setErrors(found);
     if (Object.keys(found).length > 0) {
@@ -52,7 +62,7 @@ export function EntranceForm({
         Address
         <input onChange={(e) => setAddress(e.target.value)} value={address} />
       </label>
-      {errors.address && <p className="error">{errors.address}</p>}
+      {errors.address && <p className="error">{errors.address[0]}</p>}
       <label>
         Floors
         <input
@@ -61,7 +71,7 @@ export function EntranceForm({
           value={floors}
         />
       </label>
-      {errors.floors && <p className="error">{errors.floors}</p>}
+          {errors.floors && <p className="error">{errors.floors[0]}</p>}
       <label>
         <input
           checked={hasElevator}
