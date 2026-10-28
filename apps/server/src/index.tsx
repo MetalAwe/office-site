@@ -4,6 +4,7 @@ import { readdir } from "node:fs/promises";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { buildingsApi } from "./buildings";
 import { buildings, team } from "./data";
 import { entrancesApi } from "./entrances";
 import { etaPages } from "./eta-pages";
@@ -61,6 +62,8 @@ app.route("/strings", stringPages);
 
 // step 5: pages from an engine
 app.route("/eta", etaPages);
+
+app.route("/api/buildings", buildingsApi);
 
 app.route("/api/entrances", entrancesApi);
 
