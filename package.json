@@ -10,7 +10,9 @@
     "dev:server": "bun run --filter server dev",
     "dev:web": "bun run --filter web dev",
     "fix": "ultracite fix",
-    "prepare": "husky"
+    "migrate": "bun run --filter server migrate",
+    "prepare": "husky",
+    "seed": "bun run --filter server seed"
   },
   "dependencies": {
     "@hono/bun": "^1.0.1",
