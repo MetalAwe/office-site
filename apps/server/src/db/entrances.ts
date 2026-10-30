@@ -44,6 +44,16 @@ export function getEntrance(id: number): Entrance | null {
   return row ? toEntrance(row) : null;
 }
 
+export function searchEntrances(q: string): Entrance[] {
+  // q travels as a bound parameter: data, never part of the SQL text
+  return db
+    .query<EntranceRow, [string]>(
+      `${SELECT_ENTRANCES} WHERE e.address LIKE ? ORDER BY e.id`
+    )
+    .all(`%${q}%`)
+    .map(toEntrance);
+}
+
 export function createEntrance(entrance: NewEntrance): Entrance {
   const row = db
     .query<{ id: number }, [number, string, number, number]>(
