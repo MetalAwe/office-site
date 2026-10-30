@@ -18,10 +18,10 @@ function EntranceItem({ entrance }: { entrance: Entrance }) {
 export default function App() {
   const [entrances, setEntrances] = useState<Entrance[]>([]);
   const [buildings, setBuildings] = useState<Building[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
-    const ignore = false;
+    let ignore = false;
     // both lists at once: the form needs the buildings, the list the entrances
     Promise.all([
       fetch(`${API}/api/entrances`).then((res) => res.json()),
@@ -32,6 +32,9 @@ export default function App() {
         setBuildings(buildingList);
       }
     });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   return (
