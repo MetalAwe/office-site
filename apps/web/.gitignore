@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# the database: data, not code (step 1 of lab 4)
+*.sqlite*
