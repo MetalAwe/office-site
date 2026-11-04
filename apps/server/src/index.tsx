@@ -67,6 +67,8 @@ app.route("/api/buildings", buildingsApi);
 
 app.route("/api/entrances", entrancesApi);
 
+app.route("/api/buildings", buildingsApi);
+
 // step 6: pages from components
 app.get("/", (c) => {
   const name = c.req.query("name") ?? "stranger";
